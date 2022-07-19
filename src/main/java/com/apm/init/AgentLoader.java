@@ -49,8 +49,6 @@ public class AgentLoader {
     /**
      * 生成新的class 字节码 ，
      *
-     * @param className
-     * @param loader
      * @return
      * @throws NotFoundException
      * @throws Exception

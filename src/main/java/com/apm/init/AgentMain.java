@@ -40,7 +40,6 @@ public class AgentMain implements ClassFileTransformer {
     }
 
     static class DefineTransformer implements ClassFileTransformer {
-	    @Override
 	    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 	        System.out.println("AgentMainTest --  premain load Class:" + className);
 	        return classfileBuffer;
@@ -84,7 +83,6 @@ public class AgentMain implements ClassFileTransformer {
         inst.addTransformer(agentMain);
     }
     
-    @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 //    	System.out.println("transform --  premain load Class:" + className);
         if (className == null || loader == null
