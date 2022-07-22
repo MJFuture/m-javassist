@@ -5,6 +5,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.Arrays;
 
 import com.apm.init.AbstractCollects;
 import com.apm.init.AgentLoader;
@@ -117,10 +119,15 @@ public class JdbcCommonCollects extends AbstractCollects implements Collect {
 
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             boolean isTargetMethod = false;
-            for (String agentm : connection_agent_methods) {
-                if (agentm.equals(method.getName())) {
-                    isTargetMethod = true;
-                }
+            PreparedStatement statement = null;
+//            for (String agentm : connection_agent_methods) {
+//                if (agentm.equals(method.getName())) {
+//                    isTargetMethod = true;
+//                    break;
+//                }
+//            }
+            if (Arrays.<String>stream(JdbcCommonCollects.connection_agent_methods).anyMatch(s -> s.equals(method.getName()))){
+                isTargetMethod = true;
             }
             Object result = null;
             JdbcStatistics jdbcStat = null;
@@ -156,13 +163,21 @@ public class JdbcCommonCollects extends AbstractCollects implements Collect {
             this.statement = statement;
             this.jdbcStat = jdbcStat;
         }
-
+//        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+//            if (Arrays.<String>stream(JdbcCommonCollects.prepared_statement_methods).anyMatch(s -> s.equals(method.getName())))
+//                JdbcCommonCollects.printSql(this.statement);
+//            return method.invoke(this.statement, args);
+//        }
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             boolean isTargetMethod = false;
-            for (String agentm : prepared_statement_methods) {
-                if (agentm.equals(method.getName())) {
-                    isTargetMethod = true;
-                }
+//            for (String agentm : prepared_statement_methods) {
+//                if (agentm.equals(method.getName())) {
+//                    isTargetMethod = true;
+//
+//                }
+//            }
+            if (Arrays.<String>stream(JdbcCommonCollects.prepared_statement_methods).anyMatch(s -> s.equals(method.getName()))){
+                isTargetMethod = true;
             }
             Object result = null;
             try {
@@ -174,6 +189,8 @@ public class JdbcCommonCollects extends AbstractCollects implements Collect {
                 throw e;
             } finally {
                 if (isTargetMethod) {
+                    String printSql = JdbcCommonCollects.printSql(this.statement);
+                    jdbcStat.parameterSql = printSql;
                     JdbcCommonCollects.this.end(jdbcStat);
                 }
             }
@@ -187,6 +204,8 @@ public class JdbcCommonCollects extends AbstractCollects implements Collect {
         public String jdbcUrl;
         // sql 语句
         public String sql;
+        //带参数
+        public String parameterSql;
         // 数据库名称
         public String databaseName;
 
@@ -211,5 +230,14 @@ public class JdbcCommonCollects extends AbstractCollects implements Collect {
         }
         String dbName = url.substring(url.lastIndexOf("/") + 1);
         return dbName;
+    }
+    public static String printSql(Statement sta) {
+        String sql = sta.toString();
+        String prefix = "com.mysql.cj.jdbc.ClientPreparedStatement:";
+        if (sql.startsWith(prefix))
+            sql = sql.split(":")[1];
+//        System.out.println("\r\n--------------------------------------------\r\n" + sql + "\r\n--------------------------------------------");
+        return sql;
+
     }
 }

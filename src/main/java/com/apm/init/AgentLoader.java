@@ -83,13 +83,13 @@ public class AgentLoader {
         }
 
         public String buildSrc(CtMethod method) {
-            String result;
             try {
                 String template = method.getReturnType().getName().equals("void") ? voidSource : source;
                 String bsrc = beginSrc == null ? "" : beginSrc;
                 String eSrc = errorSrc == null ? "" : errorSrc;
                 String enSrc = endSrc == null ? "" : endSrc;
-                String src = String.format(template, bsrc, method.getName(), eSrc, enSrc);
+//                String src = String.format(template, bsrc, method.getName(), eSrc, enSrc);
+                String src = String.format(template, new Object[] { bsrc, method.getName(), eSrc, enSrc });
                 return src;
             } catch (NotFoundException e) {
                 throw new RuntimeException(e);

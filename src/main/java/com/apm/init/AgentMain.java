@@ -1,5 +1,12 @@
 package com.apm.init;
 
+import com.apm.collects.JdbcCommonCollects;
+import com.apm.collects.SpringControllerCollects;
+import com.apm.collects.SpringServiceCollects;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.LoaderClassPath;
+
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
@@ -8,16 +15,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.apm.collects.JdbcCommonCollects;
-import com.apm.collects.SpringControllerCollects;
-import com.apm.collects.SpringServiceCollects;
-
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.LoaderClassPath;
 /**
  * https://www.cnblogs.com/rickiyang/p/11368932.html   可看
+ * https://www.cnblogs.com/rickiyang/p/11336268.html
  * 监听器入口方法，所有采集器注册至该对象。
  * 由该对象的transform 来传递改造后的Class byte 至 ClassLoader进行加载。
  */
@@ -115,7 +115,7 @@ public class AgentMain implements ClassFileTransformer {
 //                System.out.println(String.format("%s  =============className=======", className));
         		CtClass cclass = cp.get(className);
         		for (Collect c : collects) {
-        			if (c.isTarget(className, loader, cclass)) { // 判断那类可以加载，仅限定只能转换一次.
+        			if (c.isTarget(className, loader, cclass)) { // 判断那类可以加载，仅限定只能转换一次
         				byte[] bytes = c.transform(loader, className, classfileBuffer, cclass);
 //        				byte[] bytes = null;
         				//File f = new File("/Users/tommy/git/bit-monitoring-agent/target/" + cclass.getSimpleName() + ".class");
