@@ -235,7 +235,7 @@ public class JdbcCommonCollects extends AbstractCollects implements Collect {
         String sql = sta.toString();
         String prefix = "com.mysql.cj.jdbc.ClientPreparedStatement:";
         if (sql.startsWith(prefix))
-            sql = sql.split(":")[1];
+            sql = sql.split("ClientPreparedStatement:")[1];
 //        System.out.println("\r\n--------------------------------------------\r\n" + sql + "\r\n--------------------------------------------");
         return sql;
 
