@@ -220,7 +220,10 @@ public abstract class AbstractCollects {
         }
         return null;
     }
-    // 统计信息
+    /**
+     * 统计信息内部类
+      */
+
     @NotProguard
     public static class Statistics {
         public Long begin;

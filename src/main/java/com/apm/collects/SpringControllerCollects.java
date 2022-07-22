@@ -48,9 +48,14 @@ public class SpringControllerCollects extends AbstractCollects implements Collec
         try {
             for (Object obj : ctclass.getAnnotations()) {
                 // 通过正则表达示计算出RequestMapping 地址
-                if (obj.toString().startsWith("@org.springframework.web.bind.annotation.RequestMapping")) {
+                if (obj.toString().startsWith("@org.springframework.web.bind.annotation.RequestMapping") || obj.toString().startsWith("@org.springframework.web.bind.annotation.PostMapping") ) {
                     rootRequestUrl = getAnnotationValue("value", obj.toString());
+                    System.out.println(" SpringControllerCollects---Spring---RequestMapping"+rootRequestUrl);
                 } else if (obj.toString().startsWith("@org.springframework.stereotype.Controller")) {
+                    System.out.println(" SpringControllerCollects---Spring---Controller");
+                    result = true;
+                } else if (obj.toString().startsWith("@org.springframework.web.bind.annotation.RestController")) {
+                    System.out.println(" SpringControllerCollects---Spring---RestController");
                     result = true;
                 }
             }
@@ -81,6 +86,7 @@ public class SpringControllerCollects extends AbstractCollects implements Collec
     	AgentLoader byteLoade = new AgentLoader(className, loader, ctclass);
         CtMethod[] methods = ctclass.getDeclaredMethods();
         for (CtMethod m : methods) {
+//        System.out.println(" transform-----"+m);
             String requestUrl;
             // 屏蔽非公共方法
             if (!Modifier.isPublic(m.getModifiers())) {
@@ -94,13 +100,15 @@ public class SpringControllerCollects extends AbstractCollects implements Collec
             if (Modifier.isNative(m.getModifiers())) {
                 continue;
             }
+
             // 必须带上 RequestMapping 注解
-            if ((requestUrl = getRequestMappingValue(m)) == null) {
-                continue;
-            }
+//            if ((requestUrl = getRequestMappingValue(m)) == null) {
+//                continue;
+//            }
 
             AgentLoader.MethodSrcBuild build = new AgentLoader.MethodSrcBuild();
-            build.setBeginSrc(String.format(beginSrc, className, m.getName(), rootRequestUrl + requestUrl));
+//            build.setBeginSrc(String.format(beginSrc, className, m.getName(), rootRequestUrl + requestUrl));
+            build.setBeginSrc(String.format(beginSrc, className, m.getName(), rootRequestUrl));
             build.setEndSrc(endSrc);
             build.setErrorSrc(errorSrc);
             byteLoade.updateMethod(m, build);

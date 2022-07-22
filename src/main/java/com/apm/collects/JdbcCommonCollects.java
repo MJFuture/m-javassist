@@ -41,11 +41,15 @@ public class JdbcCommonCollects extends AbstractCollects implements Collect {
      */
     public boolean isTarget(String className, ClassLoader loader, CtClass ctclass) {
         if (className.equals("com.mysql.jdbc.NonRegisteringDriver")) {
+            System.out.println("JdbcCommonCollects--1-mysql---NonRegisteringDriver");
             return true;
+        }else if (className.equals("com.alibaba.druid.pool.DruidDataSource")) {
+            System.out.println("JdbcCommonCollects--2-mysql---NonRegisteringDriver");
+            return true;
+        }else if (className.equals("com.mysql.cj.jdbc.NonRegisteringDriver")) {
+            System.out.println("JdbcCommonCollects--3-mysql---NonRegisteringDriver");
+        	return true;
         }
-//        if (className.equals("com.alibaba.druid.pool.DruidDataSource")) {
-//        	return true;
-//        }
         return false;
     }
     @NotProguard
@@ -194,6 +198,11 @@ public class JdbcCommonCollects extends AbstractCollects implements Collect {
         }
     }
 
+    /**
+     * 获取数据库名称
+     * @param url
+     * @return
+     */
     private static String getDbName(String url) {
         int index = url.indexOf("?"); //$NON-NLS-1$
         if (index != -1) {

@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 /**
  * IP and Port Helper for RPC, 
- * 
+ * RPC的IP和端口助手
  * @author shawn.qianx
  */
 

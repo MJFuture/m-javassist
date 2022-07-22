@@ -31,12 +31,13 @@ public class AgentMain implements ClassFileTransformer {
     // pro.key=
     // 访问远程服务 获取属性配置
     /**
-     * mian执行后在去执行
+     * mian执行后在去执行、启动后在去编辑相关的类
      * @param args
      * @param inst
      */
+
     public static void agentmain(String args, Instrumentation inst) {
-    	inst.addTransformer(new DefineTransformer(), true);
+//    	inst.addTransformer(new DefineTransformer(), true);
     }
 
     static class DefineTransformer implements ClassFileTransformer {
@@ -54,8 +55,10 @@ public class AgentMain implements ClassFileTransformer {
         keys = new ArrayList<String>();
         keys.addAll(Arrays.asList(paramKesy));
     }
-    
-    // 在应用启动前调用
+
+    /**
+     * 在应用启动前调用,调用此方法，进行类的的编辑
+     */
     public static void premain(String agentArgs, Instrumentation inst) {
 //        if (agentArgs != null) {
 //            String[] paramGroup = agentArgs.split(",");
@@ -96,8 +99,11 @@ public class AgentMain implements ClassFileTransformer {
             return null;
         }
         
-        if(className.startsWith("com/eprintServer/controller")  || className.startsWith("com/alibaba/druid/proxy/jdbc/ConnectionProxyImpl")) {
-        	if (!classPoolMap.containsKey(loader)) {
+        if(className.startsWith("com/gxidt/comprehensive/service/impl")
+                ||className.startsWith("com/gxidt/comprehensive/service")
+                ||className.startsWith("com/mysql/cj/jdbc/NonRegisteringDriver")
+                || className.startsWith("com/alibaba/druid/proxy/jdbc/ConnectionProxyImpl")) {
+            if (!classPoolMap.containsKey(loader)) {
         		ClassPool classPool = new ClassPool();
         		classPool.insertClassPath(new LoaderClassPath(loader));
         		classPoolMap.put(loader, classPool);
@@ -105,10 +111,13 @@ public class AgentMain implements ClassFileTransformer {
         	ClassPool cp = classPoolMap.get(loader);
         	try {
         		className = className.replaceAll("/", ".");
+//                className = className.substring(0,className.indexOf("$$"));
+//                System.out.println(String.format("%s  =============className=======", className));
         		CtClass cclass = cp.get(className);
         		for (Collect c : collects) {
-        			if (c.isTarget(className, loader, cclass)) { // 仅限定只能转换一次.
+        			if (c.isTarget(className, loader, cclass)) { // 判断那类可以加载，仅限定只能转换一次.
         				byte[] bytes = c.transform(loader, className, classfileBuffer, cclass);
+//        				byte[] bytes = null;
         				//File f = new File("/Users/tommy/git/bit-monitoring-agent/target/" + cclass.getSimpleName() + ".class");
         				//Files.write(f.toPath(), bytes);
 //        				System.out.println(String.format("%s bit APM agent insert success", className));
@@ -116,20 +125,20 @@ public class AgentMain implements ClassFileTransformer {
         			}
         		}
         	} catch (Throwable e) {
-        		new Exception(String.format("%s  APM agent insert fail", className), e).printStackTrace();
+//        		new Exception(String.format("%s  APM agent insert fail", className), e).printStackTrace();
         	}
         }
         return new byte[0];
     }
     
-    public static void main(String[] args) {
-		int i=10;System.out.println(i++);
-		String str1 = "通话";
-		String str2 = "重地";
-		String str3 = new String("通話");
-		System. out. println(String. format("str1：%d | str2：%d",  str1.hashCode(),str2.hashCode()));
-		System. out. println(str1. equals(str2));
-		System.out.println(Math.round(-1.5));
-
-	}
+//    public static void main(String[] args) {
+//		int i=10;System.out.println(i++);
+//		String str1 = "通话";
+//		String str2 = "重地";
+//		String str3 = new String("通話");
+//		System. out. println(String. format("str1：%d | str2：%d",  str1.hashCode(),str2.hashCode()));
+//		System. out. println(str1. equals(str2));
+//		System.out.println(Math.round(-1.5));
+//
+//	}
 }
