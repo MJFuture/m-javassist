@@ -123,8 +123,13 @@ public abstract class AbstractCollects {
         execHttp("errorLog", errorLog);
     }
 
+    /***
+     * 发送数据
+     * @param type
+     * @param data
+     */
     protected void execHttp(final String type, final Object data) {
-    	System.err.println("---------"+toJson(data));
+    	System.err.println("-日志记录--------"+toJson(data));
         Runnable runn = new Runnable() {
             public void run() {
                 try {

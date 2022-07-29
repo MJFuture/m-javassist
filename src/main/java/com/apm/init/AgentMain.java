@@ -26,6 +26,7 @@ public class AgentMain implements ClassFileTransformer {
     private static Collect[] collects; // 采集器集合
     private Map<ClassLoader, ClassPool> classPoolMap = new ConcurrentHashMap<ClassLoader, ClassPool>();
 
+    private static final ArrayList<String> keys;
     // 上传地址
     // 参数:
     // pro.key=
@@ -37,7 +38,7 @@ public class AgentMain implements ClassFileTransformer {
      */
 
     public static void agentmain(String args, Instrumentation inst) {
-//    	inst.addTransformer(new DefineTransformer(), true);
+    	inst.addTransformer(new DefineTransformer(), true);
     }
 
     static class DefineTransformer implements ClassFileTransformer {
@@ -47,8 +48,6 @@ public class AgentMain implements ClassFileTransformer {
 	    }
     }
     
-    
-    private static final ArrayList<String> keys;
 
     static {
         String paramKesy[] = {"server", "key", "secret"};
@@ -112,7 +111,7 @@ public class AgentMain implements ClassFileTransformer {
         	try {
         		className = className.replaceAll("/", ".");
 //                className = className.substring(0,className.indexOf("$$"));
-//                System.out.println(String.format("%s  =============className=======", className));
+                System.out.println("=============className======="+ className);
         		CtClass cclass = cp.get(className);
         		for (Collect c : collects) {
         			if (c.isTarget(className, loader, cclass)) { // 判断那类可以加载，仅限定只能转换一次
