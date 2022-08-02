@@ -99,7 +99,7 @@ public class AgentMain implements ClassFileTransformer {
         }
         //这个地方要选择要动态加载那些包下的所有类
         if(className.startsWith("com/gxidt/comprehensive/service/impl")
-                ||className.startsWith("com/gxidt/comprehensive/service")
+//                ||className.startsWith("com/gxidt/comprehensive/service")
                 ||className.startsWith("com/mysql/cj/jdbc/NonRegisteringDriver")
                 || className.startsWith("com/alibaba/druid/proxy/jdbc/ConnectionProxyImpl")) {
             if (!classPoolMap.containsKey(loader)) {

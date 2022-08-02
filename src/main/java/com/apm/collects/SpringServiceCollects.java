@@ -41,7 +41,7 @@ public class SpringServiceCollects extends AbstractCollects implements Collect {
         try {
             for (Object obj : ctclass.getAnnotations()) {
                 if (obj.toString().startsWith("@org.springframework.stereotype.Service")) {
-                    System.out.println(" SpringServiceCollects---Spring---Service");
+//                    System.out.println(" SpringServiceCollects---Spring---Service");
                     return true;
                 }
             }

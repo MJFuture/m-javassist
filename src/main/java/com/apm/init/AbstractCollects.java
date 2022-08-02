@@ -216,6 +216,12 @@ public abstract class AbstractCollects {
         execHttp(type, stat);
     }
 
+    /**
+     * 获取链接
+     * @param key
+     * @param annotationDesc
+     * @return
+     */
     public static String getAnnotationValue(String key, String annotationDesc) {
         String regex = String.format("value=\\{\".*\"\\}");
         Pattern r = Pattern.compile(regex);
@@ -225,6 +231,18 @@ public abstract class AbstractCollects {
         }
         return null;
     }
+
+    /**
+     * 获取swagger 方法说明
+     * @param key
+     * @param annotationDesc
+     * @return
+     */
+    public static String getAnnotationValueBySwagger(String key, String annotationDesc) {
+        annotationDesc = annotationDesc.substring(annotationDesc.indexOf(key)+7,annotationDesc.indexOf("notes")>0?annotationDesc.indexOf("notes")-3:annotationDesc.lastIndexOf(")")-1);
+        return annotationDesc;
+    }
+
     /**
      * 统计信息内部类
       */

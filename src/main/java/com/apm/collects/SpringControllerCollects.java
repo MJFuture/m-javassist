@@ -6,11 +6,13 @@ import com.apm.init.AgentLoader;
 import com.apm.init.Collect;
 import com.apm.init.NotProguard;
 
+import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.Modifier;
 import javassist.bytecode.ClassFile;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +38,7 @@ public class SpringControllerCollects extends AbstractCollects implements Collec
         sbuilder.append("com.apm.collects.SpringControllerCollects instance= ");
         sbuilder.append("com.apm.collects.SpringControllerCollects.INSTANCE;\r\n");
 //        sbuilder.append("com.apm.collects.SpringControllerCollects.WebStatistics statistic =(com.apm.collects.SpringControllerCollects.WebStatistics)instance.begin(\"%s\",\"%s\");");
-        sbuilder.append("com.apm.collects.SpringControllerCollects.WebStatistics statistic =(com.apm.collects.SpringControllerCollects.WebStatistics)instance.begins(\"%s\",\"%s\",\"%s\");");
+        sbuilder.append("com.apm.collects.SpringControllerCollects.WebStatistics statistic =(com.apm.collects.SpringControllerCollects.WebStatistics)instance.begins(\"%s\",\"%s\",\"%s\",\"%s\");");
 //        sbuilder.append("statistic.urlAddress=\"%s\";");
         beginSrc = sbuilder.toString();
 //        sbuilder = new StringBuilder();
@@ -71,10 +73,10 @@ public class SpringControllerCollects extends AbstractCollects implements Collec
                     rootRequestUrl = getAnnotationValue("value", obj.toString());
 //                    System.out.println(" SpringControllerCollects---Spring---RequestMapping----"+rootRequestUrl);
                 } else if (obj.toString().startsWith("@org.springframework.stereotype.Controller")) {
-                    System.out.println(" SpringControllerCollects---Spring---Controller");
+//                    System.out.println(" SpringControllerCollects---Spring---Controller");
                     result = true;
                 } else if (obj.toString().startsWith("@org.springframework.web.bind.annotation.RestController")) {
-                    System.out.println(" SpringControllerCollects---Spring---RestController");
+//                    System.out.println(" SpringControllerCollects---Spring---RestController");
                     result = true;
                 }
             }
@@ -88,8 +90,13 @@ public class SpringControllerCollects extends AbstractCollects implements Collec
      */
     public byte[] transform(ClassLoader loader, String className, byte[] classfileBuffer, CtClass ctclass) throws Exception {
         AgentLoader byteLoade = new AgentLoader(className, loader, ctclass);
+        List<CtMethod[]> classList = new ArrayList<>();
         //获取继承的接口类
         String[] interfaces = ctclass.getClassFile().getInterfaces();
+        for (String anInterface : interfaces) {
+            CtClass c = ctclass.getClassPool().get(anInterface);
+            classList.add(c.getDeclaredMethods());
+        }
         CtMethod[] methods = ctclass.getDeclaredMethods();
         for (CtMethod m : methods) {
 //        System.out.println(" transform-----"+m);
@@ -111,10 +118,10 @@ public class SpringControllerCollects extends AbstractCollects implements Collec
 //            if ((requestUrl = getRequestMappingValue(m)) == null) {
 //                continue;
 //            }
-            //TODO:重载没判断
-            if(Constants.methodsList.size()>0){
-                Constants.methodsList.forEach(ctMethods -> {
-                    Optional<CtMethod> optional = Arrays.<CtMethod>stream(ctMethods).filter(s -> m.getName().equals(s.getName())).findFirst();
+            if(classList.size()>0){
+                classList.forEach(ctMethods -> {
+                    //方法重载判断使用  m.getGenericSignature()  或 m.getSignature()
+                    Optional<CtMethod> optional = Arrays.<CtMethod>stream(ctMethods).filter(s -> m.getSignature().equals(s.getSignature())).findFirst();
                     if (optional.isPresent()){
                         try {
                             requestUrl.set(getAnnotationValue("value", optional.get().getAnnotations()[0].toString()));
@@ -123,10 +130,12 @@ public class SpringControllerCollects extends AbstractCollects implements Collec
                         }
                     }
                 });
-
             }
+
+
+
             AgentLoader.MethodSrcBuild build = new AgentLoader.MethodSrcBuild();
-            build.setBeginSrc(String.format(beginSrc, className, m.getName(), rootRequestUrl + requestUrl.get()));
+            build.setBeginSrc(String.format(beginSrc, className, m.getName(), rootRequestUrl + requestUrl.get(),getRequestSwaggerValue(m)));
 
 //            build.setBeginSrc(String.format(beginSrc, className, m.getName(), rootRequestUrl));
             build.setEndSrc(endSrc);
@@ -145,17 +154,16 @@ public class SpringControllerCollects extends AbstractCollects implements Collec
         webStat.controlName = className;
         webStat.methodName = method;
         webStat.logType="web";
-        System.out.println(method+"==="+className+"====SpringControllerCollects------begin"+webStat);
         return  webStat;
     }
     @NotProguard
-    public Statistics begins(String className, String method,String urlAddress) {
+    public Statistics begins(String className, String method,String urlAddress,String methodSwaggerExplain) {
         WebStatistics webStat = new WebStatistics(super.begin(className, method));
         webStat.controlName = className;
         webStat.methodName = method;
         webStat.urlAddress = urlAddress;
+        webStat.methodSwaggerExplain = methodSwaggerExplain;
         webStat.logType="web";
-        System.out.println(urlAddress+"========="+method+"==="+className+"====SpringControllerCollects------begins"+webStat);
         return  webStat;
     }
 
@@ -173,12 +181,22 @@ public class SpringControllerCollects extends AbstractCollects implements Collec
         }
         return null;
     }
+    private String getRequestSwaggerValue(CtMethod m) throws ClassNotFoundException {
+        for (Object s : m.getAnnotations()) {
+            if (s.toString().startsWith("@io.swagger.annotations.ApiOperation")) {
+                String val = getAnnotationValueBySwagger("value", s.toString());
+                return val==null?"":val;
+            }
+        }
+        return null;
+    }
 
     @NotProguard
     public static class WebStatistics extends Statistics { 
         public String urlAddress; //url 地址
         public String controlName; //服务名称
         public String methodName;// 方法名称
+        public String methodSwaggerExplain;// 方法说明
         public WebStatistics(Statistics s) {
             super(s);
         }
