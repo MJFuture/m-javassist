@@ -69,7 +69,7 @@ public class SpringControllerCollects extends AbstractCollects implements Collec
                     || obj.toString().startsWith("@org.springframework.web.bind.annotation.PostMapping")
                 ) {
                     rootRequestUrl = getAnnotationValue("value", obj.toString());
-                    System.out.println(" SpringControllerCollects---Spring---RequestMapping----"+rootRequestUrl);
+//                    System.out.println(" SpringControllerCollects---Spring---RequestMapping----"+rootRequestUrl);
                 } else if (obj.toString().startsWith("@org.springframework.stereotype.Controller")) {
                     System.out.println(" SpringControllerCollects---Spring---Controller");
                     result = true;

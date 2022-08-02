@@ -111,7 +111,7 @@ public class AgentMain implements ClassFileTransformer {
         	try {
         		className = className.replaceAll("/", ".");
 //                className = className.substring(0,className.indexOf("$$"));
-                System.out.println("=============className======="+ className);
+//                System.out.println("=============className======="+ className);
         		CtClass cclass = cp.get(className);
         		for (Collect c : collects) {
         			if (c.isTarget(className, loader, cclass)) { // 判断那类可以加载，仅限定只能转换一次

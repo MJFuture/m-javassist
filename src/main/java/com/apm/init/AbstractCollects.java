@@ -129,7 +129,7 @@ public abstract class AbstractCollects {
      * @param data
      */
     protected void execHttp(final String type, final Object data) {
-    	System.err.println("-日志记录--------"+toJson(data));
+    	System.err.println("---------"+toJson(data));
         Runnable runn = new Runnable() {
             public void run() {
                 try {
